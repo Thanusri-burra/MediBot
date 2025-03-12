@@ -20,16 +20,19 @@ app.get("/", (req, res) => {
   res.send("Server is running. Use /chat?message=your-message to chat.");
 });
 
-// Chatbot API Route
+// Chatbot API Route with language support
 app.get("/chat", async (req, res) => {
   const userMessage = req.query.message;
+  // Default language is English if not provided
+  const language = req.query.language || "English";
+
   if (!userMessage) {
     return res.status(400).json({ error: "Message is required" });
   }
 
   try {
-    // Instruct Gemini to return a pure JSON object (no markdown)
-    const prompt = `The user says: "${userMessage}".
+    // Instruct Gemini to return a JSON object in the specified language.
+    const prompt = `The user says: "${userMessage}" in ${language}.
 Provide a detailed health analysis in pure JSON format with these keys:
 {
   "possibleConditions": [array of possible conditions],
@@ -39,7 +42,7 @@ Provide a detailed health analysis in pure JSON format with these keys:
   "yogaTips": "string with yoga tips",
   "precautions": "string with precautions"
 }
-Return ONLY the JSON object.`;
+Respond in ${language} and return ONLY the JSON object.`;
 
     const response = await axios.post(
       API_URL,
